@@ -19,7 +19,7 @@ A powerful **desktop application** for separating audio tracks using AI-powered 
 
 ### Option 1: Download Pre-built App (Recommended)
 
-1. **Download the latest release** from [GitHub Releases](https://github.com/YOUR_GITHUB_USERNAME/SpectrumSplit/releases)
+1. **Download the latest release** from [GitHub Releases](https://github.com/magnusAchor/SpectrumSplit/releases)
 2. **Extract the zip file**:
    ```bash
    unzip SpectrumSplit-1.0.1-mac.zip
@@ -226,8 +226,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/YOUR_GITHUB_USERNAME/SpectrumSplit/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/YOUR_GITHUB_USERNAME/SpectrumSplit/discussions)
+- **Issues**: [GitHub Issues](https://github.com/magnusAchor/SpectrumSplit/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/magnusAchor/SpectrumSplit/discussions)
 - **Documentation**: See this README and inline code comments
 
 ---
