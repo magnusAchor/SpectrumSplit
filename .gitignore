@@ -30,4 +30,32 @@ dist-ssr
 .env
 .vite
 
+# Desktop app builds and releases
+electron-dist/
+release/
+*.dmg
+*.exe
+*.deb
+*.rpm
+*.snap
+*.appimage
+*.pkg
+*.msi
+*.blockmap
+
+# OS-specific files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Python cache (if any)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Temporary files
+*.tmp
+*.temp
+
 backend/

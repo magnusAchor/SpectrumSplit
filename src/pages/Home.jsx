@@ -23,6 +23,7 @@ export default function Home() {
   const [progress, setProgress] = useState(0);
 
   /* ================= AUTO RESET ================= */
+  /*
   useEffect(() => {
     if (!stems && !instrumentStems) return;
 
@@ -38,6 +39,7 @@ export default function Home() {
 
     return () => clearInterval(timer);
   }, [stems, instrumentStems]);
+  */
 
   /* ================= UPLOAD (DEMUCS STEP 1) ================= */
   const handleUpload = useCallback(async (e) => {
@@ -180,7 +182,8 @@ export default function Home() {
         {(stems || instrumentStems) && (
           <div className="bg-amber-950 border border-amber-800 p-4 rounded-2xl flex gap-3 mb-8">
             <Clock className="text-amber-400" />
-            <p>Auto-delete in <b>{timeLeft}</b> seconds</p>
+            {/*<p>Auto-delete in <b>{timeLeft}</b> seconds</p>*/}
+            <p>Downlaod Now </p>
           </div>
         )}
 
@@ -268,6 +271,16 @@ function StemPlayer({ name, url }) {
     setIsPlaying(!isPlaying);
   };
 
+  const handleDownload = (url) => {
+  const a = document.createElement('a');
+  a.href = url;
+  a.setAttribute('download', '');
+  a.target = '_blank';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+};
+
   const update = () => {
     const a = audioRef.current;
     if (!a) return;
@@ -279,10 +292,13 @@ function StemPlayer({ name, url }) {
       <div className="flex justify-between mb-4">
         <h3 className="capitalize">{name}</h3>
 
-        <a href={url} download className="text-violet-400 flex gap-2 text-sm">
-          <Download className="w-4 h-4" />
-          Download
-        </a>
+        <button
+  onClick={() => handleDownload(url)}
+  className="text-violet-400 flex gap-2 text-sm"
+>
+  <Download className="w-4 h-4" />
+  Download
+</button>
       </div>
 
       <div className="flex items-center gap-4">
