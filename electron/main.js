@@ -154,12 +154,11 @@ function startBackend() {
     "5000",
   ];
 
-  log.info("[BACKEND] Starting with:", command, args);
-  log.info("[BACKEND] Working directory:", backendDir);
-  log.info("[BACKEND] Environment PYTHONUNBUFFERED: 1");
-
-  try {
-    backendProcess = spawn(command, args, {
+  // In production, if the PyInstaller executable exists, use it instead
+  const exePath = path.join(backendDir, "main");
+  if (!isDev && fs.existsSync(exePath)) {
+    log.info("[BACKEND] Using PyInstaller executable:", exePath);
+    backendProcess = spawn(exePath, [], {
       cwd: backendDir,
       shell: false,
       env: {
@@ -168,16 +167,25 @@ function startBackend() {
         PATH: process.env.PATH,
       },
     });
+  } else {
+    log.info("[BACKEND] Starting with:", command, args);
+    log.info("[BACKEND] Working directory:", backendDir);
+    log.info("[BACKEND] Environment PYTHONUNBUFFERED: 1");
 
-    if (!backendProcess) {
-      log.error("[BACKEND] ❌ Failed to create spawn process");
+    try {
+      backendProcess = spawn(command, args, {
+        cwd: backendDir,
+        shell: false,
+        env: {
+          ...process.env,
+          PYTHONUNBUFFERED: "1",
+          PATH: process.env.PATH,
+        },
+      });
+    } catch (e) {
+      log.error("[BACKEND] ❌ Error spawning backend:", e.message);
       return;
     }
-
-    log.info("[BACKEND] ✅ Backend process spawned, PID:", backendProcess.pid);
-  } catch (e) {
-    log.error("[BACKEND] ❌ Error spawning backend:", e.message);
-    return;
   }
 
   backendProcess.stdout.on("data", (data) => {

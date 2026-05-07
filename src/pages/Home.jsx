@@ -9,6 +9,7 @@ import {
   Pause,
   Layers
 } from 'lucide-react';
+import { downloadBlob } from '@/utils/zipExport';
 
 export default function Home() {
   const [file, setFile] = useState(null);
@@ -72,8 +73,22 @@ export default function Home() {
 
       const data = await res.json();
 
-      setStems(data.stems || null);
-      setOtherStem(data.stems?.other || null); // IMPORTANT FIX
+      // Fetch blobs for each stem URL
+      const stemsWithBlobs = {};
+      for (const [name, url] of Object.entries(data.stems || {})) {
+        try {
+          const blobRes = await fetch(url);
+          if (blobRes.ok) {
+            const blob = await blobRes.blob();
+            stemsWithBlobs[name] = { blob, url, isAI: true };
+          }
+        } catch (err) {
+          console.error(`Failed to fetch blob for ${name}:`, err);
+        }
+      }
+
+      setStems(stemsWithBlobs);
+      setOtherStem(data.stems?.other || null); // keep the original URL for backend processing
 
       setProgress(100);
     } catch (err) {
@@ -100,7 +115,22 @@ export default function Home() {
       if (!res.ok) throw new Error('Instrument split failed');
 
       const data = await res.json();
-      setInstrumentStems(data.instruments);
+
+      // Fetch blobs for instrument stems
+      const instrumentsWithBlobs = {};
+      for (const [name, url] of Object.entries(data.instruments || {})) {
+        try {
+          const blobRes = await fetch(url);
+          if (blobRes.ok) {
+            const blob = await blobRes.blob();
+            instrumentsWithBlobs[name] = { blob };
+          }
+        } catch (err) {
+          console.error(`Failed to fetch blob for ${name}:`, err);
+        }
+      }
+
+      setInstrumentStems(instrumentsWithBlobs);
 
     } catch (err) {
       console.error(err);
@@ -126,7 +156,7 @@ export default function Home() {
 
     return Object.entries(instrumentStems).map(([name, data]) => ({
       name,
-      url: data?.url || data,
+      blob: data.blob,
     }));
   }, [instrumentStems]);
 
@@ -196,8 +226,8 @@ export default function Home() {
             </h2>
 
             <div className="grid gap-6">
-              {Object.entries(stems).map(([name, url]) => (
-                <StemPlayer key={name} name={name} url={url} />
+              {Object.entries(stems).map(([name, data]) => (
+                <StemPlayer key={name} name={name} blob={data.blob} />
               ))}
             </div>
           </div>
@@ -238,7 +268,7 @@ export default function Home() {
 
             <div className="grid gap-6">
               {flattenedInstrumentStems.map((stem) => (
-                <StemPlayer key={stem.name} name={stem.name} url={stem.url} />
+                <StemPlayer key={stem.name} name={stem.name} blob={stem.blob} />
               ))}
             </div>
           </div>
@@ -258,9 +288,17 @@ export default function Home() {
 
 /* ================= PLAYER ================= */
 
-function StemPlayer({ name, url }) {
+function StemPlayer({ name, blob }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [audioUrl, setAudioUrl] = useState(null);
+
+  useEffect(() => {
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
+    setAudioUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [blob]);
 
   const audioRef = React.useRef(null);
 
@@ -271,15 +309,9 @@ function StemPlayer({ name, url }) {
     setIsPlaying(!isPlaying);
   };
 
-  const handleDownload = (url) => {
-  const a = document.createElement('a');
-  a.href = url;
-  a.setAttribute('download', '');
-  a.target = '_blank';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-};
+  const handleDownload = () => {
+    if (blob) downloadBlob(blob, `${name}.wav`);
+  };
 
   const update = () => {
     const a = audioRef.current;
@@ -293,7 +325,7 @@ function StemPlayer({ name, url }) {
         <h3 className="capitalize">{name}</h3>
 
         <button
-  onClick={() => handleDownload(url)}
+  onClick={handleDownload}
   className="text-violet-400 flex gap-2 text-sm"
 >
   <Download className="w-4 h-4" />
@@ -313,7 +345,7 @@ function StemPlayer({ name, url }) {
 
       <audio
         ref={audioRef}
-        src={url}
+        src={audioUrl}
         onTimeUpdate={update}
         onEnded={() => setIsPlaying(false)}
       />

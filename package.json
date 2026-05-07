@@ -27,10 +27,11 @@
     "dev:electron": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
     "build": "vite build",
     "clean": "rm -rf dist release node_modules/.cache",
-    "dist": "npm run build && electron-builder",
-    "dist:mac": "npm run build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac",
-    "dist:win": "npm run build && electron-builder --win",
-    "dist:linux": "npm run build && electron-builder --linux"
+    "kill-processes": "pkill -f vite || true && pkill -f uvicorn || true && pkill -f 'backend/main.py' || true",
+    "dist": "npm run kill-processes && npm run build && electron-builder",
+    "dist:mac": "npm run kill-processes && npm run build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac",
+    "dist:win": "npm run kill-processes && npm run build && electron-builder --win",
+    "dist:linux": "npm run kill-processes && npm run build && electron-builder --linux"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^17.0.0",
